@@ -8,7 +8,7 @@ const request = axios.create({
 // 添加请求拦截器
 request.interceptors.request.use(async (config) => {
   // 在发送请求之前添加token
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
     // 如果有token，就添加到请求头中
     config.headers['token'] = token
@@ -31,9 +31,9 @@ request.interceptors.response.use((response) => {
     if (response.config.url?.includes('/login')) {
       ElMessage.error(response.data.msg || '登录过期，请重新登录')
       // 清除token
-      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
       // 清除用户信息
-      localStorage.removeItem('userInfo')
+      sessionStorage.removeItem('userInfo')
       window.location.href = '/auth/login'
     }
     return Promise.reject(response.data)

@@ -2,7 +2,7 @@
     <div class="articleDetail-container">
         <div class="header-section">
             <div class="header-content">
-                <img src="../assets/images/book.png" style="width: 60px; height: 60px;">
+                <img :src="imgURL" style="width: 60px; height: 60px;">
                 <h1>文章详情</h1>
             </div>
         </div>
@@ -61,6 +61,7 @@ import { useRoute } from "vue-router"
 import { List, Avatar, Platform } from "@element-plus/icons-vue"
 import { dayjs } from "element-plus"
 
+const imgURL = new URL('@/assets/images/book.png', import.meta.url).href
 const route = useRoute()
 const id = route.params.id || ''
 const articleDetail = ref<any>({})
@@ -68,7 +69,6 @@ const articleDetail = ref<any>({})
 onMounted(async () => {
     const res = await getArticleDetail(id as string)
     articleDetail.value = res.data.data
-    console.log(articleDetail.value)
 })
 
 //格式化文章内容

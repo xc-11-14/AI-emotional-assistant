@@ -4,7 +4,7 @@
       <!-- AI助手信息 -->
       <div class="ai-assistant-info">
         <div class="breathing-circle">
-          <img src="../assets/images/robot-fill.png" style="width: 25px; height: 25px;" alt="AI助手">
+          <img :src="imgURL" style="width: 25px; height: 25px;" alt="AI助手">
         </div>
         <h3 class="assistant-name">AI助手</h3>
         <div class="online-status">
@@ -115,8 +115,8 @@
         </el-button>
       </div>
       <!-- 聊天消息区 -->
-      <div class="chat-messages">
-        <div v-if="(chatMessages || []).length === 0" class="message-item ai-message">
+      <div class="chat-messages" ref="chatMessagesRef">
+        <div v-if="(chatMessages).length === 0" class="message-item ai-message">
           <div class="message-avatar">
             <img src="../assets/images/robot-fill.png" alt="AI助手" style="width: 18px; height: 18px;">
           </div>
@@ -127,7 +127,7 @@
             <div class="message-time">刚刚</div>
           </div>
         </div>
-        <div class="message-item" v-for="item in chatMessages" :key="item.id"
+        <div class="message-item" v-for="(item, index) in chatMessages" :key="item.id"
           :style="item.senderType === 1 ? 'justify-content: flex-end;' : 'justify-content: flex-start;'"
           :class="item.senderType === 1 ? 'user-message' : 'ai-message'">
           <div class="message-avatar" v-if="item.senderType === 2">
@@ -150,7 +150,9 @@
                 :is-ai-message="true" />
               <p v-else-if="item.content" v-html="formatMarkdown(item.content)"></p>
             </div>
-            <div class="message-time">{{ item.sentType === 2 ? '正在输入中' : item.createdAt }}</div>
+            <div class="message-time">{{ isAIAnswer && item.senderType === 2 && index === chatMessages.length - 1 ?
+              '正在回答...'
+              : item.createdAt }}</div>
           </div>
           <div class="message-avatar" v-if="item.senderType === 1">
             <img src="/src/assets/images/robot-fill.png" alt="AI助手" style="width: 18px; height: 18px;">
@@ -180,17 +182,19 @@
 
 <script setup lang="ts">
 import MarkRender from '@/components/MarkRender.vue'
+import dayjs from 'dayjs'
 import { Plus, Promotion } from '@element-plus/icons-vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatRound, Clock, DeleteFilled } from '@element-plus/icons-vue'
 // 引入fetchEventSource库 用于接收服务器发送的事件流
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { startConsultation, getConsultationSessionList, deleteConsultationSession, getConsultationSessionDetail, getConsultationSessionEmotion } from '@/api/admin'
+const imgURL = new URL('@/assets/images/robot-fill.png', import.meta.url).href
 
 //定义一个当前会话对象
 const currentSession = ref<any>({})
-//定义对话消息
+//定义对话消息, 包含用户和AI助手的消息,用于在聊天区回显
 const chatMessages = ref<any>([])
 //定义用户输入的消息
 const userMessage = ref('')
@@ -202,8 +206,10 @@ const pageSize = ref('10')
 //定义会话列表
 const sessionList = ref<any>([])
 onMounted(() => {
-  createNewSession()
+  //获取会话列表
   getSessionPage()
+  //新建会话
+  createNewSession()
 })
 
 //定义情绪花园数据
@@ -222,6 +228,7 @@ const loadEmotionGarden = async (sessionId: string) => {
   const res = await getConsultationSessionEmotion(id)
   if (res.data.code === '200') {
     emotionGarden.value = res.data.data
+    console.log(emotionGarden.value)
   } else {
     ElMessage.error(res.data.message)
   }
@@ -302,6 +309,14 @@ const deleteSession = async (id: string) => {
   }
 }
 
+//进度条滚动到最下面
+const chatMessagesRef = ref<any>(null)
+const scrollToBottom = () => {
+  nextTick(() => {
+    chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight
+  })
+}
+
 //发送消息
 const sendMessage = async () => {
   if (!userMessage.value.trim()) return
@@ -322,8 +337,9 @@ const sendMessage = async () => {
       id: Date.now(),
       senderType: 1,
       content: message,
-      createdAt: new Date().toLocaleString()
+      createdAt: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
     })
+    //开始流式对话
     startStreamConsultation(currentSession.value.sessionId, message)
   }
 }
@@ -337,14 +353,14 @@ const startNewConsultation = async (message: string) => {
   }
   if (currentSession.value.sessionTitle === '新对话') {
     //如果是新对话，会话标题为当前时间
-    sessionParams.sessionTitle = `AI心理助手 - ${new Date().toLocaleString()}`
+    sessionParams.sessionTitle = `AI心理助手 - ${dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')}`
   } else {
     //如果不是新对话，会话标题为当前会话标题
     sessionParams.sessionTitle = currentSession.value.sessionTitle
   }
   //调用开始咨询接口
   const res = await startConsultation(sessionParams)
-  //将后端返回的数据转为前段会话格式
+  //将后端返回的数据转为前端会话格式
   const sessionData = {
     sessionId: res.data.data.sessionId,
     status: res.data.data.status,
@@ -365,7 +381,7 @@ const startNewConsultation = async (message: string) => {
     id: Date.now(),
     senderType: 1,
     content: message,
-    createdAt: new Date().toLocaleString()
+    createdAt: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
   })
   //开始流式对话
   startStreamConsultation(currentSession.value.sessionId, message)
@@ -383,10 +399,12 @@ const startStreamConsultation = async (sessionId: string, userMessage: string) =
     id: `ai_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     senderType: 2,
     content: '',
-    createdAt: new Date().toLocaleString()
+    createdAt: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
   }
   //将AI助手添加到消息列表
   chatMessages.value.push(aiMessage)
+  //滚动到最新消息
+  scrollToBottom()
   //调用流式接口
   //创建一个取消控制器,js新增的api,终止fetch请求
   const controller = new AbortController()
@@ -395,7 +413,7 @@ const startStreamConsultation = async (sessionId: string, userMessage: string) =
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
-      "token": localStorage.getItem('token') || ''
+      "token": sessionStorage.getItem('token') || ''
     },
     body: JSON.stringify({
       sessionId,
@@ -424,6 +442,7 @@ const startStreamConsultation = async (sessionId: string, userMessage: string) =
         const payload = JSON.parse(res)
         if (String(payload.code) === '200' && payload.data && payload.data.content) {
           aiMessage.content += payload.data.content
+          scrollToBottom()
         } else if (String(payload.code) !== '200') {
           handleError(payload.message || 'AI回复失败')
         }

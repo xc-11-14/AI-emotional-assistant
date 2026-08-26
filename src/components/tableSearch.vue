@@ -68,10 +68,11 @@ const formData = ref<any>({})
 
 // 动态组件渲染
 const isComp = (comp: string) => {
-  if (comp === 'input') return 'el-input'
-  if (comp === 'select') return 'el-select'
-  return 'el-input'
-}
+  return {
+    input: 'el-input',
+    select: 'el-select',
+  }[comp]
+ }
 
 // 搜索
 const handleSearch = () => {

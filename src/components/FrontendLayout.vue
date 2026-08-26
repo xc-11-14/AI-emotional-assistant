@@ -42,12 +42,12 @@ const router = useRouter()
 const route = useRoute()
 const isLogin = ref(false)
 onMounted(() => {
-    isLogin.value = localStorage.getItem('token') !== null
+    isLogin.value = sessionStorage.getItem('token') !== null
 })
 
 const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('userInfo')
     isLogin.value = false
     ElMessage.success('退出成功')
     router.push({ name: 'login' })

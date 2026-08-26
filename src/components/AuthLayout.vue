@@ -5,7 +5,7 @@
                 <h2 class="title">{{ title }}</h2>
                 <p class="text">每个焦虑的时刻，我们都在这里，不必独自承受，让心与心的连接温暖您的每一天</p>
                 <div class="robot">
-                    <img src="@/assets/images/robot-fill.png" alt="logo">
+                    <img :src="imgURL" alt="logo">
                 </div>
             </div>
         </div>
@@ -19,6 +19,7 @@
 import { computed } from 'vue'
 import { useMainStore } from '@/stores/index'
 
+const imgURL = new URL('@/assets/images/robot-fill.png', import.meta.url).href
 const mainStore = useMainStore()
 
 const title = computed(() => {

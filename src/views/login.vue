@@ -20,7 +20,7 @@
                     size="large">{{ loginFlag ? '登录中' : '登录' }}</el-button>
             </el-form>
             <div class="footer">
-                <p>还没有账号？<router-link to="/auth/register" @click="mainStore.isLogin = false" style="color: #409eff;">去注册</router-link></p>
+                <p>还没有账号？<router-link to="/auth/register" @click="isLogin = false" style="color: #409eff;">去注册</router-link></p>
                 <p>
                     <span @click="router.push({ name: 'home' })">点击这里</span>以返回首页
                 </p>
@@ -38,6 +38,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const mainStore = useMainStore()
+const isLogin = ref(true)
 const loginFormRef = ref<any>()
 const loginFlag = ref(false)
 
@@ -66,11 +67,11 @@ const submitForm = async (formEl: any) => {
         if (valid) {
             const res = await login(formData.value)
             ElMessage.success('登录成功')
-            localStorage.setItem('userInfo', JSON.stringify(res.data.data.userInfo))
-            localStorage.setItem('token', res.data.data.token)
+            sessionStorage.setItem('userInfo', JSON.stringify(res.data.data.userInfo))
+            sessionStorage.setItem('token', res.data.data.token)
             //根据用户角色判断跳转的路径
             if (res.data.data.userInfo.userType === 2) {
-                router.push('/back')
+                router.push({ name: 'back' })
             } else {
                 router.push({ name: 'home' })
             }

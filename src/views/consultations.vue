@@ -49,7 +49,7 @@
                             :class="item.senderType === 1 ? 'user-message' : 'ai-message'">
                             <div class="message-header">
                                 <span class="sender">{{ item.senderType === 1 ? '用户' : 'AI助手' }}</span>
-                                <span class="time">{{ item.createdAt }}</span>
+                                <span class="time">{{ item.createdAt}}</span>
                             </div>
                             <div class="message-content">{{ item.content }}</div>
                         </div>

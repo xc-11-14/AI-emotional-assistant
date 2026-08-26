@@ -45,8 +45,8 @@ const handleCommand = (command: string) => {
         logout().then(() => {
             ElMessage.success('退出成功')
             router.push({ name: 'login' })
-            localStorage.removeItem('token')
-            localStorage.removeItem('userInfo')
+            sessionStorage.removeItem('token')
+            sessionStorage.removeItem('userInfo')
         })
     })
 }

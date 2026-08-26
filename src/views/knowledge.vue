@@ -7,10 +7,12 @@
         </PageHead>
         <tableSearch :formItem="formItem" @search="handleSearch" @reset="handleReset" />
         <el-table :data="tableData" style="width: 100%;margin-top: 25px;" v-loading="tableLoading">
-            <el-table-column label="文章标题" >
+            <el-table-column label="文章标题">
                 <template #default="scope">
                     <div style="display: flex; align-items: center; justify-content: center;">
-                        <el-icon><timer /></el-icon> {{ scope.row.title }}
+                        <el-icon>
+                            <timer />
+                        </el-icon> {{ scope.row.title }}
                     </div>
                 </template>
             </el-table-column>
@@ -30,11 +32,14 @@
             <el-table-column label="操作" width="450" fixed="right">
                 <template #default="scope">
                     <el-space :size="8">
-                        <el-button :style="{ padding: '0 6px' }" text type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+                        <el-button :style="{ padding: '0 6px' }" text type="primary"
+                            @click="handleEdit(scope.row)">编辑</el-button>
                         <el-button :style="{ padding: '0 6px' }" @click="handlePublish(scope.row)" type="success" text
-                        v-if="scope.row.status === 0 || scope.row.status === 2">发布</el-button>
-                        <el-button :style="{ padding: '0 6px' }" @click="handleOffline(scope.row)" type="warning" text v-else>下线</el-button>
-                        <el-button :style="{ padding: '0 6px' }" @click="handleDelete(scope.row)" type="danger" text>删除</el-button>
+                            v-if="scope.row.status === 0 || scope.row.status === 2">发布</el-button>
+                        <el-button :style="{ padding: '0 6px' }" @click="handleOffline(scope.row)" type="warning" text
+                            v-else>下线</el-button>
+                        <el-button :style="{ padding: '0 6px' }" @click="handleDelete(scope.row)" type="danger"
+                            text>删除</el-button>
                     </el-space>
                 </template>
             </el-table-column>

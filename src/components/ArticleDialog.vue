@@ -21,7 +21,7 @@
             <el-form-item label="封面图片">
                 <div class="cover-upload">
                     <el-upload :show-file-list="false" accept="image/*" class="avatar-uploader"
-                        :before-upload="beforeUpload" :http-request="uploadFile">
+                        :http-request="uploadFile">
                         <div class="cover-placeholder" v-if="!imgURL">
                             <p>点击上传封面</p>
                         </div>
@@ -110,7 +110,6 @@ watch(() => props.currentArticle, (newVal) => {
         }
         if (newVal.tags) {
             formData.value.tagArray = newVal.tags.split(',')
-            console.log(formData.value.tagArray)
         } else {
             formData.value.tagArray = []
         }
@@ -193,26 +192,21 @@ const commonTags = [
 
 // 上传图片部分
 const imgURL = ref('')
-const beforeUpload = (file: any) => {
-    const isImage = file.type.startsWith('image/')
-    const isLt5MB = file.size / 1024 / 1024 < 5
+//UUID生成业务ID
+const businessId = ref('')
+const uploadFile = async (file: any) => {
+    const isImage = file.file.type.startsWith('image/')
+    const isLt5MB = file.file.size / 1024 / 1024 < 5
     if (!isImage) {
         ElMessage.error('请上传图片文件')
-        return false
+        return
     }
     if (!isLt5MB) {
         ElMessage.error('图片大小不能超过5MB')
-        return false
+        return
     }
-    return true
-}
-//UUID生成业务ID
-const businessId = ref('')
-const uploadFile = async ({ file }: { file: File }) => {
     businessId.value = crypto.randomUUID()
-    const res = await uploadFilePart(file, {
-        businessId: businessId.value
-    })
+    const res = await uploadFilePart(file.file, { businessId: businessId.value })
     if (res.data.code === '200') {
         ElMessage.success('上传成功')
         imgURL.value = filePath + res.data.data.filePath

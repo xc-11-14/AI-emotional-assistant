@@ -2,14 +2,13 @@
     <el-aside :width="mainStore.isCollapsed ? '64px' : '264px'">
         <el-menu class="side-menu" :default-active="activePath">
             <div class="brand">
-                <img src="@/assets/images/机器人.png" alt="logo"
-                    :style="{ marginRight: mainStore.isCollapsed ? '0px' : '10px' }" />
+                <img :src="imgURL" alt="logo" :style="{ marginRight: mainStore.isCollapsed ? '0px' : '10px' }" />
                 <div class="info-card" v-if="!mainStore.isCollapsed">
                     <h1 class="brand-title">心理健康AI助手</h1>
                     <p class="brand-subtitle">管理后台</p>
                 </div>
             </div>
-            <el-menu-item @click="selectMenu(item.path)" v-for="item in asideList" :key="item.path" :index="item.path">
+            <el-menu-item @click="selectMenu(item.path)" v-for="item in asideList" :key="item.path" :index="item.path" >
                 <el-icon>
                     <component :is="item.meta.icon" />
                 </el-icon>
@@ -21,20 +20,19 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useMainStore } from '@/stores'
 const mainStore = useMainStore()
 const asideList = ref<any>([])
 const router = useRouter()
-const activePath = ref(localStorage.getItem('activePath'))
+const activePath = ref(sessionStorage.getItem('activePath'))
+const imgURL = new URL('@/assets/images/机器人.png', import.meta.url).href
 
 onMounted(() => {
     asideList.value = router.options.routes[0]?.children || []
 })
 const selectMenu = (path: string) => {
-    const currentRoute = router.options.routes[0]?.path;
-    router.push(`${currentRoute}/${path}`)
-    localStorage.setItem('activePath', path)
+    router.push(path)
 }
 </script>
 

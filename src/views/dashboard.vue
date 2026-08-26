@@ -125,7 +125,6 @@ onMounted(async () => {
     const res = await getSummary()
     if (res.data.code === '200') {
         summary.value = res.data.data
-        console.log(summary.value)
         loading.value = false
     }
     await nextTick()

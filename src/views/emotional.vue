@@ -264,8 +264,8 @@ const handleSearch = async (formData: any) => {
     const params = {
         userId: formData.userId,
         moodScoreRange: formData.moodScoreRange,
-        minMoodScore: formData.moodScoreRange.split('-')[0],
-        maxMoodScore: formData.moodScoreRange.split('-')[1],
+        minMoodScore: formData?.moodScoreRange?.split('-')[0],
+        maxMoodScore: formData?.moodScoreRange?.split('-')[1],
         current: pagination.value.currentPage,
         size: pagination.value.size
     }

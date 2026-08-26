@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-const activePath = localStorage.getItem('activePath')
 const backendroutes: RouteRecordRaw[] = [
   // 后台管理系统路由
   {
     path: '/back',
+    name: 'back',
     component: () => import('@/components/BackendLayout.vue'),
-    redirect: `/back/${activePath || 'dashboard'}`,
+    redirect: `/back/dashboard`,
     children: [
       {
         path: 'dashboard',
@@ -107,29 +107,27 @@ const router = createRouter({
 
 //路由前置守卫
 router.beforeEach((to, from) => {
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
     if (userInfo.userType == 2) {
       if (to.path.startsWith('/back')) {
         //如果访问后台管理系统路由，且有token，直接放行
         return true
       } else if (to.path == '/auth') {
-        return `/back/${activePath || 'dashboard'}`
+        return `/back/dashboard`
       }
     } else if (userInfo.userType == 1) {
       if (to.path.startsWith('/back') || to.path.startsWith('/auth')) {
         //如果访问后台管理系统路由，且有token，重定向到后台管理系统首页
-        return `/`
+        return `/back/dashboard`
       }
     }
   } else {
-    if (to.path.startsWith('/back')) {
+    if (to.path.startsWith('/back') || to.path == '/auth') {
       //如果访问后台管理系统路由，且没有token，重定向到登录页
       return '/auth/login'
-    } else if (to.path == '/auth') {
-      return '/auth/login'
-    }
+    } 
     else {
       return true
     }
